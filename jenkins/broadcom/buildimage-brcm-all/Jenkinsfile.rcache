@@ -7,7 +7,7 @@ pipeline {
 
     environment {
         SONIC_TEAM_WEBHOOK = credentials('public-jenkins-builder')
-        DOCKER_BUILDER_MOUNT = "$(pwd):/sonic -v /nfs/build/test-certs:/tmp/certs"
+        DOCKER_BUILDER_MOUNT = "${WORKSPACE}:/sonic -v /nfs/build/test-certs:/tmp/certs"
         SONIC_OVERRIDE_BUILD_VARS = "SONIC_OVERRIDE_BUILD_VARS=SIGNING_KEY=/tmp/certs/signing.key SIGNING_CERT=/tmp/certs/signing.cert"
     }
 
