@@ -16,6 +16,7 @@ pipeline {
     stages {
         stage('Prepare') {
             steps {
+                . scripts/bldenv/common/build-config.sh
                 step([$class: 'WsCleanup'])
                 checkout([$class: 'GitSCM',
                           branches: [[name: 'refs/heads/master']],
@@ -38,7 +39,6 @@ pipeline {
 git submodule foreach --recursive '[ -f .git ] && echo "gitdir: $(realpath --relative-to=. $(cut -d" " -f2 .git))" > .git'
 
 
-. scripts/bldenv/common/build-config.sh
 CACHE_OPTIONS="SONIC_DPKG_CACHE_METHOD=rcache SONIC_DPKG_CACHE_SOURCE=/nfs/dpkg_cache/broadcom"
 make configure PLATFORM=broadcom
 make SONIC_CONFIG_BUILD_JOBS=1 $CACHE_OPTIONS INSTALL_DEBUG_TOOLS=y target/sonic-broadcom.bin
