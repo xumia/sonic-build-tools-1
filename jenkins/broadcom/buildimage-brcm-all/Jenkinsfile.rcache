@@ -19,6 +19,13 @@ pipeline {
                 sh '''
                 . scripts/bldenv/common/build-config.sh
                 '''
+                script{
+                    echo "SONIC_OVERRIDE_BUILD_VARS=$SONIC_OVERRIDE_BUILD_VARS"
+                    echo "DOCKER_BUILDER_MOUNT=$DOCKER_BUILDER_MOUNT"
+                    . scripts/bldenv/common/build-config.sh
+                    echo "SONIC_OVERRIDE_BUILD_VARS=$SONIC_OVERRIDE_BUILD_VARS"
+                    echo "DOCKER_BUILDER_MOUNT=$DOCKER_BUILDER_MOUNT"
+                }
                 step([$class: 'WsCleanup'])
                 checkout([$class: 'GitSCM',
                           branches: [[name: 'refs/heads/master']],
