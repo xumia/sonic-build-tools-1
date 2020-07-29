@@ -18,16 +18,6 @@ pipeline {
     stages {
         stage('Prepare') {
             steps {
-                sh '''
-                . scripts/bldenv/common/build-config.sh
-                '''
-                script{
-                    echo "SONIC_OVERRIDE_BUILD_VARS=$SONIC_OVERRIDE_BUILD_VARS"
-                    echo "DOCKER_BUILDER_MOUNT=$DOCKER_BUILDER_MOUNT"
-                    SONIC_OVERRIDE_BUILD_VARS="test2"
-                    echo "SONIC_OVERRIDE_BUILD_VARS=$SONIC_OVERRIDE_BUILD_VARS"
-                    echo "DOCKER_BUILDER_MOUNT=$DOCKER_BUILDER_MOUNT"
-                }
                 step([$class: 'WsCleanup'])
                 checkout([$class: 'GitSCM',
                           branches: [[name: 'refs/heads/master']],
@@ -51,7 +41,6 @@ git submodule foreach --recursive '[ -f .git ] && echo "gitdir: $(realpath --rel
 
 echo SONIC_OVERRIDE_BUILD_VARS="${SONIC_OVERRIDE_BUILD_VARS}"
 echo DOCKER_BUILDER_MOUNT="${DOCKER_BUILDER_MOUNT}"
-. scripts/bldenv/common/build-config.sh
 CACHE_OPTIONS="SONIC_DPKG_CACHE_METHOD=rcache SONIC_DPKG_CACHE_SOURCE=/nfs/dpkg_cache/broadcom"
 make configure PLATFORM=broadcom
 make SONIC_CONFIG_BUILD_JOBS=1 $CACHE_OPTIONS INSTALL_DEBUG_TOOLS=y target/sonic-broadcom.bin
