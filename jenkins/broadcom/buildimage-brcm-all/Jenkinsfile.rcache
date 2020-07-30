@@ -18,7 +18,7 @@ pipeline {
             steps {
                 step([$class: 'WsCleanup'])
                 checkout([$class: 'GitSCM',
-                          branches: [[name: 'refs/heads/master']],
+                          branches: [[name: 'refs/heads/xumia_f19']],
                           extensions: [[$class: 'SubmoduleOption',
                                         disableSubmodules: false,
                                         parentCredentials: false,
@@ -27,7 +27,7 @@ pipeline {
                                         trackingSubmodules: false],
                                        [$class: 'LocalBranch',
                                         localBranch: "**"]],
-                          userRemoteConfigs: [[url: 'http://github.com/Azure/sonic-buildimage']]])
+                          userRemoteConfigs: [[url: 'https://github.com/xumia/sonic-buildimage-1']]])
             }
         }
 
@@ -37,8 +37,16 @@ pipeline {
 
 git submodule foreach --recursive '[ -f .git ] && echo "gitdir: $(realpath --relative-to=. $(cut -d" " -f2 .git))" > .git'
 
+azureKeyVault([[envVariable: 'PFX_FILE', name: 'sonic-signing-cert', secretType: 'Certificate']])
+TMP_PATH=$(mktemp -d)
+scripts/convert-pfx-cert-format.sh -p $PFX_FILE -k $TMP_PATH/signing.key -c $TMP_PATH/signing.cert -a $TMP_PATH/ca.cert
 SONIC_OVERRIDE_BUILD_VARS="SIGNING_KEY=/tmp/certs/signing.key SIGNING_CERT=/tmp/certs/signing.cert CA_CERT=/tmp/certs/ca.cert"
-DOCKER_BUILDER_MOUNT="$(pwd):/sonic -v /nfs/build/test-certs:/tmp/certs"
+DOCKER_BUILDER_MOUNT="$(pwd):/sonic -v $TMP_PATH:/tmp/certs"
+
+ls $TMP_PATH
+ls $PFX_FILE
+exit 1
+
 CACHE_OPTIONS="SONIC_DPKG_CACHE_METHOD=rcache SONIC_DPKG_CACHE_SOURCE=/nfs/dpkg_cache/broadcom"
 make configure PLATFORM=broadcom
 make SONIC_CONFIG_BUILD_JOBS=1 $CACHE_OPTIONS INSTALL_DEBUG_TOOLS=y target/sonic-broadcom.bin
