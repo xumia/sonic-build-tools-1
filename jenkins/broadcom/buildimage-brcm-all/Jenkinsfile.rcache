@@ -7,6 +7,7 @@ pipeline {
 
     environment {
         SONIC_TEAM_WEBHOOK = credentials('public-jenkins-builder')
+        TMP_PATH=$(mktemp -d)
     }
 
     triggers {
@@ -40,14 +41,10 @@ pipeline {
 
 git submodule foreach --recursive '[ -f .git ] && echo "gitdir: $(realpath --relative-to=. $(cut -d" " -f2 .git))" > .git'
 
-TMP_PATH=$(mktemp -d)
 scripts/convert-pfx-cert-format.sh -p $PFX_FILE -k $TMP_PATH/signing.key -c $TMP_PATH/signing.cert -a $TMP_PATH/ca.cert
 SONIC_OVERRIDE_BUILD_VARS="SIGNING_KEY=/tmp/certs/signing.key SIGNING_CERT=/tmp/certs/signing.cert CA_CERT=/tmp/certs/ca.cert"
 DOCKER_BUILDER_MOUNT="$(pwd):/sonic -v $TMP_PATH:/tmp/certs"
-
-ls $TMP_PATH
-ls $PFX_FILE
-exit 1
+echo "TMP_PATH=$TMP_PATH"
 
 CACHE_OPTIONS="SONIC_DPKG_CACHE_METHOD=rcache SONIC_DPKG_CACHE_SOURCE=/nfs/dpkg_cache/broadcom"
 make configure PLATFORM=broadcom
@@ -77,6 +74,7 @@ make SONIC_CONFIG_BUILD_JOBS=1 $CACHE_OPTIONS target/docker-syncd-brcm-rpc.gz ta
         }
         cleanup {
             cleanWs(disableDeferredWipeout: false, deleteDirs: true, notFailBuild: true)
+            sh "[ -d $TMP_PATH ] && rm -rf $TMP_PATH"
         }
     }
 }
