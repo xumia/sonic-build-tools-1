@@ -45,6 +45,8 @@ scripts/convert-pfx-cert-format.sh -p $PFX_FILE -k $TMP_PATH/signing.key -c $TMP
 SONIC_OVERRIDE_BUILD_VARS="SIGNING_KEY=/tmp/certs/signing.key SIGNING_CERT=/tmp/certs/signing.cert CA_CERT=/tmp/certs/ca.cert"
 DOCKER_BUILDER_MOUNT="$(pwd):/sonic -v $TMP_PATH:/tmp/certs"
 echo "TMP_PATH=$TMP_PATH"
+exit 1
+
 
 CACHE_OPTIONS="SONIC_DPKG_CACHE_METHOD=rcache SONIC_DPKG_CACHE_SOURCE=/nfs/dpkg_cache/broadcom"
 make configure PLATFORM=broadcom
