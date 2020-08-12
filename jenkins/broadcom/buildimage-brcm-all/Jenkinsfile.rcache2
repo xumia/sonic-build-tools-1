@@ -1,0 +1,75 @@
+pipeline {
+    agent { node { label 'jenkins-workers-slow' } }
+
+    options {
+        buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '30'))
+    }
+
+    environment {
+        SONIC_TEAM_WEBHOOK = credentials('public-jenkins-builder')
+        TMP_PATH=sh(script: "mktemp -d", returnStdout: true).trim()
+    }
+
+    triggers {
+        pollSCM('@midnight')
+    }
+
+    stages {
+        stage('Prepare') {
+            steps {
+                step([$class: 'WsCleanup'])
+                checkout([$class: 'GitSCM',
+                          branches: [[name: 'refs/heads/master']],
+                          extensions: [[$class: 'SubmoduleOption',
+                                        disableSubmodules: false,
+                                        parentCredentials: false,
+                                        recursiveSubmodules: true,
+                                        reference: '',
+                                        trackingSubmodules: false],
+                                       [$class: 'LocalBranch',
+                                        localBranch: "**"]],
+                          userRemoteConfigs: [[url: 'https://github.com/azure/sonic-buildimage']]])
+            }
+        }
+
+        stage('Build') {
+            options {
+              azureKeyVault([[envVariable: 'PFX_FILE', name: 'sonic-signing-cert', secretType: 'Certificate']])
+            }
+            steps {
+                sh '''#!/bin/bash -xe
+
+git submodule foreach --recursive '[ -f .git ] && echo "gitdir: $(realpath --relative-to=. $(cut -d" " -f2 .git))" > .git'
+
+scripts/convert-pfx-cert-format.sh -p $PFX_FILE -k $TMP_PATH/signing.key -c $TMP_PATH/signing.cert -a $TMP_PATH/ca.cert
+SONIC_OVERRIDE_BUILD_VARS="SIGNING_KEY=/tmp/certs/signing.key SIGNING_CERT=/tmp/certs/signing.cert CA_CERT=/tmp/certs/ca.cert"
+DOCKER_BUILDER_MOUNT="$(pwd):/sonic -v $TMP_PATH:/tmp/certs"
+
+mkdir -p target
+wget https://sonic-jenkins.westus2.cloudapp.azure.com/job/broadcom/job/buildimage-brcm-all/lastSuccessfulBuild/artifact/target/sonic-aboot-broadcom.swi -o target/sonic-aboot-broadcom.swi
+cp $TMP_PATH/ca.cert target/ca.cert
+./scripts/sign_image.sh -i target/sonic-aboot-broadcom.swi -k $TMP_PATH/signing.key -c $TMP_PATH/signing.cert -a target/ca.cert
+
+'''
+            }
+        }
+
+    }
+    post {
+
+        success {
+            archiveArtifacts(artifacts: 'target/**')
+        }
+        fixed {
+            slackSend(color:'#00FF00', message: "Build job back to normal: ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)")
+            office365ConnectorSend(webhookUrl: "${env.SONIC_TEAM_WEBHOOK}")
+        }
+        regression {
+            slackSend(color:'#FF0000', message: "Build job Regression: ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)")
+            office365ConnectorSend(webhookUrl: "${env.SONIC_TEAM_WEBHOOK}")
+        }
+        cleanup {
+            cleanWs(disableDeferredWipeout: false, deleteDirs: true, notFailBuild: true)
+        }
+    }
+}
