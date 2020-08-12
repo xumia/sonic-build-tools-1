@@ -69,7 +69,6 @@ cp $TMP_PATH/ca.cert target/ca.cert
             office365ConnectorSend(webhookUrl: "${env.SONIC_TEAM_WEBHOOK}")
         }
         cleanup {
-            cleanWs(disableDeferredWipeout: false, deleteDirs: true, notFailBuild: true)
         }
     }
 }
