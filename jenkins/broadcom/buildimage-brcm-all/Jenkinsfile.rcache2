@@ -6,7 +6,6 @@ pipeline {
     }
 
     environment {
-        SONIC_TEAM_WEBHOOK = credentials('public-jenkins-builder')
         TMP_PATH=sh(script: "mktemp -d", returnStdout: true).trim()
     }
 
