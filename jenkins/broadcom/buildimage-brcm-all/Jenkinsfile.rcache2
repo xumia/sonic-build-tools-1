@@ -33,7 +33,7 @@ pipeline {
 
         stage('Build') {
             options {
-              azureKeyVault([[envVariable: 'PFX_FILE', name: 'sonic-signing-cert', secretType: 'Certificate']])
+              azureKeyVault([[envVariable: 'PFX_FILE', name: 'sonic-signing-cert', secretType: 'Certificates']])
             }
             steps {
                 sh '''#!/bin/bash -xe
