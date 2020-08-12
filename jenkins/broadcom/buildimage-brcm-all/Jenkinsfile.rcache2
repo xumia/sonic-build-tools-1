@@ -46,7 +46,7 @@ DOCKER_BUILDER_MOUNT="$(pwd):/sonic -v $TMP_PATH:/tmp/certs"
 
 mkdir -p target
 #wget https://sonic-jenkins.westus2.cloudapp.azure.com/job/broadcom/job/buildimage-brcm-all/lastSuccessfulBuild/artifact/target/sonic-aboot-broadcom.swi -o target/sonic-aboot-broadcom.swi
-zip Makefile -o target/sonic-aboot-broadcom.swi
+zip target/sonic-aboot-broadcom.swi Makefile
 cp $TMP_PATH/ca.cert target/ca.cert
 ./scripts/sign_image.sh -i target/sonic-aboot-broadcom.swi -k $TMP_PATH/signing.key -c $TMP_PATH/signing.cert -a target/ca.cert
 
