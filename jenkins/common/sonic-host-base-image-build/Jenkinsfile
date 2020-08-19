@@ -1,0 +1,44 @@
+pipeline {
+    agent { node { label 'jenkins-workers' } }
+
+    options {
+        buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '10'))
+    }
+
+    triggers {
+        pollSCM('@weekly')
+    }
+
+    stages {
+
+        stage('Build') {
+            steps {
+                sh '''#!/bin/bash -ex
+
+DISTROS=("jessie" "stretch" "buster")
+ARCHS=("amd64")
+for distro in ${DISTROS[@]}
+do
+    for arch in ${ARCHS[@]}
+    do
+        VERSION=$(date +"%Y%m%d%H%M%S")
+        TARGET_PATH="./fsroot-${version}"
+        sudo debootstrap --variant=minbase --print-debs --arch "$arch"  "$distro" "$TARGET_PATH" http://debian-archive.trafficmanager.net/debian
+        pushd "${TARGET_PATH}"
+        sudo tar -zvcf "image-host-amd64_$(VERSION).tar.gz" .
+        popd
+    done
+done
+'''
+            }
+        }
+    }
+    post {
+        success {
+            azureUpload allowAnonymousAccess: true, blobProperties: [cacheControl: '', contentEncoding: '', contentLanguage: '', contentType: '', detectContentType: true], containerName: 'packages', fileShareName: '', filesPath: '*.gz', storageCredentialId: 'sonicstoragepublic', storageType: 'blobstorage', uploadArtifactsOnlyIfSuccessful: true
+        }
+        cleanup {
+            cleanWs(disableDeferredWipeout: false, deleteDirs: true, notFailBuild: true)
+        }
+    }
+}
