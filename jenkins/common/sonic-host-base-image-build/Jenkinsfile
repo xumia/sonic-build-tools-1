@@ -40,8 +40,8 @@ do
     for arch in ${ARCHS[@]}
     do
         TARGET_NAME="target/image-host-${arch}-${distro}_${VERSION}"
-        SONIC_RUN_CMDS="sudo debootstrap --variant=minbase --arch $arch  $distro $TARGET_NAME http://debian-archive.trafficmanager.net/debian"
-        SONIC_RUN_CMDS="${SONIC_RUN_CMDS}" BLDENV="$distro" make -f Makefile.work sonic-slave-run
+        SONIC_RUN_CMDS="sudo debootstrap --variant=minbase --arch $arch  $distro $TARGET_NAME http://debian-archive.trafficmanager.net/debian" \
+        BLDENV="$distro" make -f Makefile.work sonic-slave-run
         pushd "${TARGET_NAME}"
         sudo tar -zvcf "${WORKSPACE}/${TARGET_NAME}.tar.gz" .
         popd
