@@ -22,10 +22,10 @@ do
     for arch in ${ARCHS[@]}
     do
         VERSION=$(date +"%Y%m%d%H%M%S")
-        TARGET_PATH="./fsroot-${VERSION}"
-        sudo debootstrap --variant=minbase --arch "$arch"  "$distro" "$TARGET_PATH" http://debian-archive.trafficmanager.net/debian
-        pushd "${TARGET_PATH}"
-        sudo tar -zvcf "${WORKSPACE}/image-host-amd64_$(VERSION).tar.gz" .
+        TARGET_NAME="image-host-${arch}-${distro}_$(VERSION)"
+        sudo debootstrap --variant=minbase --arch "$arch"  "$distro" "$TARGET_NAME" http://debian-archive.trafficmanager.net/debian
+        pushd "${TARGET_NAME}"
+        sudo tar -zvcf "${WORKSPACE}/${TARGET_NAME}.tar.gz" .
         popd
     done
 done
