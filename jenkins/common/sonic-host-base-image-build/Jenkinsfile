@@ -53,7 +53,7 @@ done
     }
     post {
         success {
-            azureUpload allowAnonymousAccess: true, blobProperties: [cacheControl: '', contentEncoding: '', contentLanguage: '', contentType: '', detectContentType: true], containerName: 'packages', fileShareName: '', filesPath: '*.gz', storageCredentialId: 'sonicstoragepublic', storageType: 'blobstorage', uploadArtifactsOnlyIfSuccessful: true
+            azureUpload allowAnonymousAccess: true, blobProperties: [cacheControl: '', contentEncoding: '', contentLanguage: '', contentType: '', detectContentType: true], containerName: 'packages', fileShareName: '', filesPath: 'target/image-*.gz', storageCredentialId: 'sonicstoragepublic', storageType: 'blobstorage', uploadArtifactsOnlyIfSuccessful: true
         }
         cleanup {
             cleanWs(disableDeferredWipeout: false, deleteDirs: true, notFailBuild: true)
