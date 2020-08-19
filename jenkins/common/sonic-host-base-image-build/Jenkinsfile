@@ -1,0 +1,64 @@
+pipeline {
+    agent { node { label 'jenkins-workers' } }
+
+    options {
+        buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '10'))
+    }
+
+    triggers {
+        pollSCM('@weekly')
+    }
+
+    stages {
+        stage('Prepare') {
+            steps {
+                step([$class: 'WsCleanup'])
+                checkout([$class: 'GitSCM',
+                          branches: [[name: 'refs/heads/master']],
+                          extensions: [[$class: 'SubmoduleOption',
+                                        disableSubmodules: false,
+                                        parentCredentials: false,
+                                        recursiveSubmodules: true,
+                                        reference: '',
+                                        trackingSubmodules: false],
+                                       [$class: 'LocalBranch',
+                                        localBranch: "**"]],
+                          userRemoteConfigs: [[url: 'http://github.com/Azure/sonic-buildimage']]])
+            }
+        }
+        stage('Build') {
+            steps {
+                sh '''#!/bin/bash -ex
+
+git submodule foreach --recursive '[ -f .git ] && echo "gitdir: $(realpath --relative-to=. $(cut -d" " -f2 .git))" > .git'
+VERSION=$(date +"%Y%m%d%H%M%S")
+DISTROS=("jessie" "stretch" "buster")
+ARCHS=("amd64")
+mkdir -p target
+for distro in ${DISTROS[@]}
+do
+    for arch in ${ARCHS[@]}
+    do
+        TARGET_NAME="target/image-host-${arch}-${distro}_${VERSION}"
+        SONIC_RUN_CMDS="sudo debootstrap --variant=minbase --arch $arch  $distro $TARGET_NAME http://debian-archive.trafficmanager.net/debian" \
+        BLDENV="$distro" make -f Makefile.work sonic-slave-run
+        pushd "${TARGET_NAME}"
+        sudo tar -zvcf "${WORKSPACE}/${TARGET_NAME}.tar.gz" .
+        popd
+    done
+done
+'''
+            }
+        }
+    }
+    post {
+        success {
+            dir("target") {
+                azureUpload allowAnonymousAccess: true, blobProperties: [cacheControl: '', contentEncoding: '', contentLanguage: '', contentType: '', detectContentType: true], containerName: 'packages', fileShareName: '', filesPath: 'image-*.gz', storageCredentialId: 'sonicstoragepublic', storageType: 'blobstorage', uploadArtifactsOnlyIfSuccessful: true
+            }
+        }
+        cleanup {
+            cleanWs(disableDeferredWipeout: false, deleteDirs: true, notFailBuild: true)
+        }
+    }
+}
