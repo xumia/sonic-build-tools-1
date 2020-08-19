@@ -22,7 +22,7 @@ do
     for arch in ${ARCHS[@]}
     do
         VERSION=$(date +"%Y%m%d%H%M%S")
-        TARGET_NAME="image-host-${arch}-${distro}_$(VERSION)"
+        TARGET_NAME="image-host-${arch}-${distro}_${VERSION}"
         sudo debootstrap --variant=minbase --arch "$arch"  "$distro" "$TARGET_NAME" http://debian-archive.trafficmanager.net/debian
         pushd "${TARGET_NAME}"
         sudo tar -zvcf "${WORKSPACE}/${TARGET_NAME}.tar.gz" .
