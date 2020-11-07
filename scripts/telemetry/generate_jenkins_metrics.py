@@ -170,7 +170,7 @@ def copy_dict(_dict, columns):
 
 def get_metric_builds(brs):
     results = []
-    build_columns = ['Number', 'Url', 'Name', 'Folder', 'BuildOn', 'DumpTime', 'Timestamp', 'EndTime', 'Duration']
+    build_columns = ['Number', 'Url', 'Name', 'Folder', 'BuildOn', 'Result', 'DumpTime', 'Timestamp', 'EndTime', 'Duration']
     for br in brs:
         build = copy_dict(br, build_columns)
         results.append(build)
