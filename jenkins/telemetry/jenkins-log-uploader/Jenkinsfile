@@ -15,7 +15,8 @@ pipeline {
                 sh '''#!/bin/bash -ex
 scripts/telemetry/generate_jenkins_metrics.py
 ls Jenkins*.json
-sudo chmod a+r Jenkins*.json
+mkdir target/
+cp Jenkins*.json target/
 '''
             }
         }
@@ -23,7 +24,7 @@ sudo chmod a+r Jenkins*.json
     post {
         success {
             dir("target") {
-                azureUpload allowAnonymousAccess: true, blobProperties: [cacheControl: '', contentEncoding: '', contentLanguage: '', contentType: '', detectContentType: true], containerName: 'jenkins-telemetry', fileShareName: '', filesPath: 'Jenkins*.json', storageCredentialId: 'sonicstoragepublic', storageType: 'blobstorage', uploadArtifactsOnlyIfSuccessful: true
+                azureUpload allowAnonymousAccess: true, blobProperties: [cacheControl: '', contentEncoding: '', contentLanguage: '', contentType: '', detectContentType: true], containerName: 'jenkins-telemetry', fileShareName: '', filesPath: 'target/Jenkins*.json', storageCredentialId: 'sonicstoragepublic', storageType: 'blobstorage', uploadArtifactsOnlyIfSuccessful: true
             }
         }
         cleanup {
