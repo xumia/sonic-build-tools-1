@@ -108,7 +108,7 @@ def get_build_results(jobs, dt=0):
     results = []
     upload_job = get_upload_job(jobs)
     timestamp = get_last_success_time(upload_job)
-    print('The last build timestamp is {0}'.format(timestamp.isoformat()))
+    print('The last build timestamp is {0}'.format(datetime.datetime.fromtimestamp(timestamp/1000.0).isoformat()))
     for job in jobs:
         results += get_build_results_by_job(job, timestamp, dt)
     return results
