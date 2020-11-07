@@ -15,6 +15,7 @@ pipeline {
                 sh '''#!/bin/bash -ex
 scripts/telemetry/generate_jenkins_metrics.py
 ls Jenkins*.json
+sudo chmod a+r Jenkins*.json
 '''
             }
         }
