@@ -91,6 +91,7 @@ def get_build_results_by_job(job, et, dt=0):
             br['BuildOn'] = ""
             if 'buildOn' in build:
                 br['BuildOn'] = build['buildOn']
+            br['Result'] = result
             br['DumpTime'] = dump_time.isoformat()
             br['Timestamp'] = timestamp.isoformat()
             br['EndTime'] = complete_timestamp.isoformat()
