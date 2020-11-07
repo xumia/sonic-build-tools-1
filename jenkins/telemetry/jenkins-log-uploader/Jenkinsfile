@@ -1,0 +1,31 @@
+pipeline {
+    agent { node { label 'jenkins-workers' } }
+
+    options {
+        buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '10'))
+    }
+
+    triggers {
+        pollSCM('@daily')
+    }
+
+    stages {
+        stage('Build') {
+            steps {
+                sh '''#!/bin/bash -ex
+scripts/telemetry/generate_jenkins_metrics.py
+'''
+            }
+        }
+    }
+    post {
+        success {
+            dir("target") {
+                azureUpload allowAnonymousAccess: true, blobProperties: [cacheControl: '', contentEncoding: '', contentLanguage: '', contentType: '', detectContentType: true], containerName: 'jenkins-telemetry', fileShareName: '', filesPath: 'target/Jenkins*.json', storageCredentialId: 'sonicstoragepublic', storageType: 'blobstorage', uploadArtifactsOnlyIfSuccessful: true
+            }
+        }
+        cleanup {
+            cleanWs(disableDeferredWipeout: false, deleteDirs: true, notFailBuild: true)
+        }
+    }
+}
