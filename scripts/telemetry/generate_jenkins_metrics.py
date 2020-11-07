@@ -40,7 +40,9 @@ def get_upload_job(jobs):
     JOB_NAME='jenkins-log-uploader'
     for job in jobs:
         if job['name'] == JOB_NAME:
+            print('The upload job {0} found'.format(JOB_NAME))
             return job
+    print('The upload job {0} does not exist'.format(JOB_NAME))
     return None
 
 def get_last_success_time(job):
@@ -106,6 +108,7 @@ def get_build_results(jobs, dt=0):
     results = []
     upload_job = get_upload_job(jobs)
     timestamp = get_last_success_time(upload_job)
+    print('The last build timestamp is {0}'.format(timestamp.isoformat()))
     for job in jobs:
         results += get_build_results_by_job(job, timestamp, dt)
     return results
