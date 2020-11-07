@@ -14,8 +14,7 @@ pipeline {
             steps {
                 sh '''#!/bin/bash -ex
 scripts/telemetry/generate_jenkins_metrics.py
-ls target/Jenkins*.json
-cp target/Jenkins*.json ./
+ls Jenkins*.json
 '''
             }
         }

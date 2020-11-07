@@ -203,9 +203,7 @@ def write_metrics(metrics, filepath, msg=''):
 def main():
     timestamp = datetime.datetime.utcnow()
     dt = timestamp.timestamp()*1000
-    target_path='./target'
-    if not os.path.exists(target_path):
-        os.makedirs(target_path)
+    target_path='.'
     file_subfix = timestamp.strftime('%Y-%m-%dT%H%M%S.json')
     component_filename = target_path + "/JenkinsBuildTargets_" + file_subfix
     build_filename = target_path + '/JenkinsBuilds_' + file_subfix
