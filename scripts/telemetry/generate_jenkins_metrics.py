@@ -46,7 +46,7 @@ def get_upload_job(jobs):
     return None
 
 def get_last_success_time(job):
-    t = datetime.datetime(2020,11, 6)
+    t = datetime.datetime(2018,1, 1)
     timestamp = t.timestamp()*1000.0
     if not job or 'builds' not in job:
         return timestamp
