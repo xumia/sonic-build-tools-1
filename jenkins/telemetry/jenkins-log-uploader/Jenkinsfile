@@ -23,8 +23,8 @@ cp Jenkins*.json target/
     }
     post {
         success {
-            dir("target") {
-                azureUpload allowAnonymousAccess: true, blobProperties: [cacheControl: '', contentEncoding: '', contentLanguage: '', contentType: '', detectContentType: true], containerName: 'jenkins-telemetry', fileShareName: '', filesPath: 'target/Jenkins*.json', storageCredentialId: 'sonicstoragepublic', storageType: 'blobstorage', uploadArtifactsOnlyIfSuccessful: true
+            dir(".") {
+                azureUpload allowAnonymousAccess: true, blobProperties: [cacheControl: '', contentEncoding: '', contentLanguage: '', contentType: '', detectContentType: true], containerName: 'jenkins-telemetry', fileShareName: '', filesPath: 'Jenkins*.json', storageCredentialId: 'sonicstoragepublic', storageType: 'blobstorage', uploadArtifactsOnlyIfSuccessful: true
             }
         }
         cleanup {
