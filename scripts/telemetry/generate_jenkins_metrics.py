@@ -181,7 +181,7 @@ def get_metric_builds(brs):
 
 def get_mertic_buildoutput(brs):
     results = []
-    buildoutput_columns = ['Number', 'Name', 'Folder', 'DumpTime', 'Timestamp', 'EndTime', 'Output']
+    buildoutput_columns = ['Number', 'Url', 'Name', 'Folder', 'BuildOn', 'Result', 'DumpTime', 'Timestamp', 'EndTime', 'Duration', 'Output']
     for br in brs:
         buildoutput = copy_dict(br, buildoutput_columns)
         results.append(buildoutput)
@@ -212,6 +212,7 @@ def main():
     file_subfix = timestamp.strftime('%Y-%m-%dT%H%M%S.json')
     component_filename = target_path + "/JenkinsBuildTargets_" + file_subfix
     build_filename = target_path + '/JenkinsBuilds_' + file_subfix
+    output_filename = target_path + '/JenkinsBuildOutputs_' + file_subfix
     
     jobs = get_jobs()
     jobs_tmp = jobs
@@ -220,6 +221,8 @@ def main():
     write_metrics(components, component_filename, 'metric_components')
     metric_builds = get_metric_builds(brs)
     write_metrics(metric_builds, build_filename, 'metric_builds')
+    mertic_buildoutputs = get_mertic_buildoutput(brs)
+    write_metrics(mertic_buildoutputs, output_filename, 'mertic_buildoutputs')
 
 if __name__ == "__main__":
     main()
