@@ -1,5 +1,5 @@
 pipeline {
-    agent { node { label 'jenkins-build-workers' } }
+    agent { node { label 'jenkins-build-cache' } }
 
     options {
         buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '30'))
