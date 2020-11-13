@@ -18,7 +18,7 @@ pipeline {
             steps {
                 step([$class: 'WsCleanup'])
                 checkout([$class: 'GitSCM',
-                          branches: [[name: 'refs/heads/master']],
+                          branches: [[name: 'refs/remotes/origin/master']],
                           extensions: [[$class: 'SubmoduleOption',
                                         disableSubmodules: false,
                                         parentCredentials: false,
