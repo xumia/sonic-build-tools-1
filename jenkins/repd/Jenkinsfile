@@ -1,0 +1,82 @@
+pipeline {
+    agent { node { label 'jenkins-workers-slow' } }
+
+    options {
+        buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '30'))
+    }
+
+    environment {
+        SONIC_TEAM_WEBHOOK = credentials('public-jenkins-builder')
+        SONIC_SERVICE = credentials('sonic-service')
+    }
+
+    triggers {
+        pollSCM('@midnight')
+    }
+
+    stages {
+        stage('Prepare') {
+            steps {
+                step([$class: 'WsCleanup'])
+                checkout([$class: 'GitSCM',
+                          branches: [[name: 'refs/heads/repd']],
+                          extensions: [[$class: 'SubmoduleOption',
+                                        disableSubmodules: false,
+                                        parentCredentials: false,
+                                        recursiveSubmodules: true,
+                                        reference: '',
+                                        trackingSubmodules: false],
+                                       [$class: 'LocalBranch',
+                                        localBranch: "**"]],
+                          userRemoteConfigs: [[url: 'http://github.com/xumia/sonic-buildimage-2']]])
+            }
+        }
+
+        stage('Build') {
+            steps {
+                sh '''#!/bin/bash -xe
+
+git submodule foreach --recursive '[ -f .git ] && echo "gitdir: $(realpath --relative-to=. $(cut -d" " -f2 .git))" > .git'
+
+TMPFILE=$(mktemp)
+echo -e '#!/bin/bash\necho $GIT_PASSWORD' > $TMPFILE
+chmod u+x $TMPFILE
+export GIT_PASSWORD=SONIC_SERVICE_PWD
+export GIT_ASKPASS=$TMPFILE
+git config credential.https://github.com.username $SONIC_SERVICE_USR
+mkdir -p files/build/versions
+date > testfile
+git add testfile
+git commit -m "Test git push"
+git push
+
+exit 0
+OPTIONS="SONIC_VERSION_CONTROL_COMPONENTS=all"
+make configure PLATFORM=broadcom
+make SONIC_CONFIG_BUILD_JOBS=1 $OPTIONS INSTALL_DEBUG_TOOLS=y target/sonic-broadcom.bin
+mv target/sonic-broadcom.bin target/sonic-broadcom-dbg.bin
+make SONIC_CONFIG_BUILD_JOBS=1 $OPTIONS target/sonic-broadcom.bin
+make SONIC_CONFIG_BUILD_JOBS=1 $OPTIONS ENABLE_IMAGE_SIGNATURE=y target/sonic-aboot-broadcom.swi
+make SONIC_CONFIG_BUILD_JOBS=1 $OPTIONS target/sonic-broadcom.raw
+ENABLE_SYNCD_RPC=y make SONIC_CONFIG_BUILD_JOBS=1 $OPTIONS target/docker-syncd-brcm-rpc.gz
+make freeze FREEZE_VERSION_OPTIONS=-r
+if [ -d files/build/versions ]; then
+  git diff files/build/versions
+  git add files/versions
+  git commit -m "Add version files"
+  git push origin repd
+fi
+'''
+            }
+        }
+
+    }
+    post {
+        success {
+            archiveArtifacts(artifacts: 'target/**')
+        }
+        cleanup {
+            cleanWs(disableDeferredWipeout: false, deleteDirs: true, notFailBuild: true)
+        }
+    }
+}
