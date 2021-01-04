@@ -46,7 +46,8 @@ export GIT_ASKPASS=$TMPFILE
 git config user.name $SONIC_SERVICE_USR
 git config credential.https://github.com.username $SONIC_SERVICE_USR
 
-OPTIONS="SONIC_VERSION_CONTROL_COMPONENTS=all"
+#OPTIONS="SONIC_VERSION_CONTROL_COMPONENTS=all"
+OPTIONS="SONIC_VERSION_CONTROL_COMPONENTS=none"
 make configure PLATFORM=broadcom
 make SONIC_CONFIG_BUILD_JOBS=1 $OPTIONS INSTALL_DEBUG_TOOLS=y target/sonic-broadcom.bin
 mv target/sonic-broadcom.bin target/sonic-broadcom-dbg.bin
