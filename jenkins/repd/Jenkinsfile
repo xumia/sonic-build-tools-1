@@ -62,14 +62,13 @@ ENABLE_SYNCD_RPC=y make SONIC_CONFIG_BUILD_JOBS=1 $OPTIONS target/docker-syncd-b
 make freeze FREEZE_VERSION_OPTIONS=-r
 if [ -d files/build/versions ]; then
   git diff files/build/versions
-  git add files/versions
+  git add files/build/versions
   git commit -m "Add version files"
   git push origin repd
 fi
 '''
             }
         }
-
     }
     post {
         success {
