@@ -41,16 +41,11 @@ git submodule foreach --recursive '[ -f .git ] && echo "gitdir: $(realpath --rel
 TMPFILE=$(mktemp)
 echo -e '#!/bin/bash\necho $GIT_PASSWORD' > $TMPFILE
 chmod u+x $TMPFILE
-export GIT_PASSWORD=SONIC_SERVICE_PWD
+export GIT_PASSWORD=$SONIC_SERVICE_PSW
 export GIT_ASKPASS=$TMPFILE
+git config user.name $SONIC_SERVICE_USR
 git config credential.https://github.com.username $SONIC_SERVICE_USR
-mkdir -p files/build/versions
-date > testfile
-git add testfile
-git commit -m "Test git push"
-git push
 
-exit 0
 OPTIONS="SONIC_VERSION_CONTROL_COMPONENTS=all"
 make configure PLATFORM=broadcom
 make SONIC_CONFIG_BUILD_JOBS=1 $OPTIONS INSTALL_DEBUG_TOOLS=y target/sonic-broadcom.bin
@@ -64,7 +59,7 @@ if [ -d files/build/versions ]; then
   git diff files/build/versions
   git add files/build/versions
   git commit -m "Add version files"
-  git push origin repd
+  git push --set-upstream origin repd
 fi
 '''
             }
