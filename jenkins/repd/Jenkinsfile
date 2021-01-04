@@ -1,5 +1,5 @@
 pipeline {
-    agent { node { label 'jenkins-workers-slow' } }
+    agent { node { label 'jenkins-build-version-upgrade' } }
 
     options {
         buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '30'))
