@@ -15,7 +15,7 @@ steps:
     for mirror_name in $mirror_names; do
         db_version=none
         publish_version=
-        version_name=${mirror_name}-databse-version
+        version_name=${mirror_name}-database-version
         publish_version_file=work/publish/versions/$version_name
         db_version_file=work/_storage_data/aptly/${mirror_name}/version
         [ -f "$publish_version_file" ] && publish_version=$(cat "$publish_version_file")
