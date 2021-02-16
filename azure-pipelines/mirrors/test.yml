@@ -72,7 +72,6 @@ stages:
         for number in $OLD_PRS; do
           gh pr close $number
         done
-        echo gh pr create -l "$UPGRADE_TAG" --title "Upgrade SONiC Versions" --body "Upgrade SONiC Versions" -B $(Build.SourceBranchName) -R $(Build.Repository.Name)
         gh pr create -l "$UPGRADE_TAG" --title "Upgrade SONiC Versions" --body "Upgrade SONiC Versions" -B $(Build.SourceBranchName) -R $(Build.Repository.Name)
       env:
         GIT_USER: $(GIT_USER)
