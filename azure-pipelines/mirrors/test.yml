@@ -59,7 +59,7 @@ stages:
         git config credential.https://github.com.username $GIT_USER
         git add files/build/versions
         git commit -m "Update SONiC version files"
-        [ -z "$GIT_REPO" ] && GIT_REPO=sonic-buildimage
+        [ -z "$GIT_REPO" ] && GIT_REPO=$(Build.SourceBranchName)
         git checkout -b $BRANCH_NAME
         git remote add remote https://github.com/$GIT_USER/$GIT_REPO
         git push remote HEAD:refs/heads/$BRANCH_NAME -f
