@@ -72,7 +72,6 @@ stages:
         echo "login"
         OLD_PRS=$(gh pr list -B $(Build.SourceBranchName) -R $(Build.Repository.Name) -l "$UPGRADE_TAG" | cut -d$'\t' -f1)
         for number in $OLD_PRS; do
-          echo "Close PR $number in repo $(Build.Repository.Name)"
           gh pr close $number
         done
         echo gh pr create -l "$UPGRADE_TAG" --title "Upgrade SONiC Versions" --body "Upgrade SONiC Versions" -B $(Build.SourceBranchName) -R $(Build.Repository.Name)
