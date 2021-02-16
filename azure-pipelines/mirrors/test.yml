@@ -67,9 +67,7 @@ stages:
 
         UPGRADE_TAG="Auto-Version-Upgrade"
         rm -f ~/.config/gh/hosts.yml
-        echo $GIT_PASSWORD > GIT_PASSWORD
         echo $GIT_PASSWORD | gh auth login --with-token
-        echo "login"
         OLD_PRS=$(gh pr list -B $(Build.SourceBranchName) -R $(Build.Repository.Name) -l "$UPGRADE_TAG" | cut -d$'\t' -f1)
         for number in $OLD_PRS; do
           gh pr close $number
