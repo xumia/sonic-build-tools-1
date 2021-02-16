@@ -66,7 +66,6 @@ stages:
         git branch -u remote/$BRANCH_NAME
 
         UPGRADE_TAG="Auto-Version-Upgrade"
-        rm -f ~/.config/gh/hosts.yml
         echo $GIT_PASSWORD | gh auth login --with-token
         OLD_PRS=$(gh pr list -B $(Build.SourceBranchName) -R $(Build.Repository.Name) -l "$UPGRADE_TAG" | cut -d$'\t' -f1)
         for number in $OLD_PRS; do
