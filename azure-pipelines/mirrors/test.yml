@@ -41,6 +41,7 @@ stages:
           echo "GROUP_NAMES=$GROUP_NAMES"
           echo "UpdateMirror=$(UpdateMirror)"
           echo "SourceBranchName=$(Build.SourceBranchName)"
+          echo "SourceBranch=$(Build.SourceBranch)"
           echo "$GROUP_NAMES"
         displayName: 'Print Parameters'
       - script: |
