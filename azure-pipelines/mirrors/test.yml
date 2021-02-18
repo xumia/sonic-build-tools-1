@@ -40,7 +40,8 @@ stages:
           echo "GROUP_NAME=$GROUP_NAME"
           echo "GROUP_NAMES=$GROUP_NAMES"
           echo "UpdateMirror=$(UpdateMirror)"
-          echo "$GROUP_NAMES" > work/_aptly/mirror_names
+          echo "SourceBranchName=$(Build.SourceBranchName)"
+          echo "$GROUP_NAMES"
         displayName: 'Print Parameters'
       - script: |
           echo "UPDATE_MIRROR=$UPDATE_MIRROR"
