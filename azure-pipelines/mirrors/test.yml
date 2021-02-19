@@ -77,13 +77,15 @@ stages:
         git push remote HEAD:refs/heads/$BRANCH_NAME -f
         git branch -u remote/$BRANCH_NAME
 
-        UPGRADE_TAG="Auto-Version-Upgrade"
         echo $GIT_PASSWORD | gh auth login --with-token
-        OLD_PRS=$(gh pr list -B $(Build.SourceBranch) -R $(Build.Repository.Name) -l "$UPGRADE_TAG" | cut -d$'\t' -f1)
-        for number in $OLD_PRS; do
-          gh pr close $number
-        done
-        gh pr create --label $UPGRADE_TAG --title "Upgrade SONiC Versions" --body "Upgrade SONiC Versions" -B $(Build.SourceBranch) -R $(Build.Repository.Name)
+        TITLE="Upgrade SONiC Versions"
+        BODY="Upgrade SONiC Versions"
+        if ! gh pr create -t "$TITLE" -b "$BODY" -B $(Build.SourceBranch) -R $(Build.Repository.Name) > pr.log 2>&1; then
+          if ! grep -q "already exists" pr.log; then
+            exit 1
+          fi
+        fi
+        exit 0
       env:
         GIT_USER: $(GIT_USER)
         GIT_PASSWORD: $(GIT_PASSWORD)
@@ -119,7 +121,6 @@ stages:
         displayName: 'Publish Mirror'
       jobGroups:
       - name: jessie
-        condition: false
         variables:
           MIRROR_FILESYSTEM: debian
           MIRROR_URL: 'http://deb.debian.org/debian'
