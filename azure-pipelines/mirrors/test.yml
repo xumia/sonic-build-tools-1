@@ -119,6 +119,7 @@ stages:
         displayName: 'Publish Mirror'
       jobGroups:
       - name: jessie
+        condition: false
         variables:
           MIRROR_FILESYSTEM: debian
           MIRROR_URL: 'http://deb.debian.org/debian'
