@@ -80,12 +80,14 @@ stages:
         echo $GIT_PASSWORD | gh auth login --with-token
         TITLE="Upgrade SONiC Versions"
         BODY="Upgrade SONiC Versions"
+        RET=0
         if ! gh pr create -t "$TITLE" -b "$BODY" -B $(Build.SourceBranch) -R $(Build.Repository.Name) > pr.log 2>&1; then
           if ! grep -q "already exists" pr.log; then
-            exit 1
+            RET=1
           fi
         fi
-        exit 0
+        cat pr.log
+        exit $RET
       env:
         GIT_USER: $(GIT_USER)
         GIT_PASSWORD: $(GIT_PASSWORD)
