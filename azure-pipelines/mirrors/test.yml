@@ -78,11 +78,14 @@ stages:
         git branch -u remote/$BRANCH_NAME
 
         echo $GIT_PASSWORD | gh auth login --with-token
-        if ! gh pr create --title "Upgrade SONiC Versions" --body "Upgrade SONiC Versions" -B $(Build.SourceBranch) -R $(Build.Repository.Name) 2>&1 | tee pr.log; then
+        TITLE="Upgrade SONiC Versions"
+        BODY="Upgrade SONiC Versions"
+        if ! gh pr create -t "$TITLE" -b "$BODY" -B $(Build.SourceBranch) -R $(Build.Repository.Name) > pr.log 2>&1; then
           if grep -q "already exists" pr.log; then
             exit 1
           fi
         fi
+        exit 0
       env:
         GIT_USER: $(GIT_USER)
         GIT_PASSWORD: $(GIT_PASSWORD)
