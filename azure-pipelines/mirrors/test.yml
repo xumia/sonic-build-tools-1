@@ -49,7 +49,19 @@ stages:
           echo "Skipped to send the pull request, GIT_USER not set."
           exit 0
         fi
-        BRANCH_NAME=repd/versions/$(Build.SourceBranchName)
+        GIT_STATUS=$(git status  --porcelain files/build/versions)
+        if [ -z "$GIT_STATUS" ]; then
+          echo "Skiipped to send the pull request, no version change in files/build/versions"
+          exit 0
+        fi
+        if [ ! -d "$HOME" ]; then
+          sudo mkdir -p $HOME
+          sudo chown -R $(id -un):$(id -gn) $HOME
+        fi
+        SOURCE_BRANCH=$(Build.SourceBranch)
+        REPO_NAME=$(Build.Repository.Name)
+        [ -z "$GIT_REPO" ] && GIT_REPO=${REPO_NAME#*/}
+        BRANCH_NAME=repd/versions/${SOURCE_BRANCH#refs/heads/}
         echo '#!/bin/bash' > git_env_password.sh
         echo 'echo $GIT_PASSWORD' >> git_env_password.sh
         chmod a+x git_env_password.sh
@@ -59,18 +71,19 @@ stages:
         git config credential.https://github.com.username $GIT_USER
         git add files/build/versions
         git commit -m "Update SONiC version files"
-        [ -z "$GIT_REPO" ] && GIT_REPO=$(Build.SourceBranchName)
+        [ -z "$GIT_REPO" ] && GIT_REPO=$(Build.Repository.Name)
         git checkout -b $BRANCH_NAME
         git remote add remote https://github.com/$GIT_USER/$GIT_REPO
         git push remote HEAD:refs/heads/$BRANCH_NAME -f
         git branch -u remote/$BRANCH_NAME
+
         UPGRADE_TAG="Auto-Version-Upgrade"
         echo $GIT_PASSWORD | gh auth login --with-token
-        OLD_PRS=$(gh pr list -B $(Build.SourceBranchName) -R $(Build.Repository.Name) -l "$UPGRADE_TAG" | cut -d$'\t' -f1)
+        OLD_PRS=$(gh pr list -B $(Build.SourceBranch) -R $(Build.Repository.Name) -l "$UPGRADE_TAG" | cut -d$'\t' -f1)
         for number in $OLD_PRS; do
           gh pr close $number
         done
-        gh pr create -l "$UPGRADE_TAG" --title "Upgrade SONiC Versions" --body "Upgrade SONiC Versions" -B $(Build.SourceBranchName) -R $(Build.Repository.Name)
+        gh pr create -l "$UPGRADE_TAG" --title "Upgrade SONiC Versions" --body "Upgrade SONiC Versions" -B $(Build.SourceBranch) -R $(Build.Repository.Name)
       env:
         GIT_USER: $(GIT_USER)
         GIT_PASSWORD: $(GIT_PASSWORD)
