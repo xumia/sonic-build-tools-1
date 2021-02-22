@@ -23,7 +23,8 @@ stages:
 - stage: test
   jobs:
   - job: Test
-    pool: ubuntu-latest
+    pool:
+      vmImage: 'ubuntu-latest'
     steps:
     - script: |
         sudo rm -rf *
