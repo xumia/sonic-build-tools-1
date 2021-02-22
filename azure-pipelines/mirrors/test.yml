@@ -23,6 +23,7 @@ stages:
 - stage: test
   jobs:
   - job: Test
+    pool: ubuntu-latest
     steps:
     - script: |
         sudo rm -rf *
