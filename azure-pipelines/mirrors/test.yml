@@ -4,6 +4,7 @@
 # https://aka.ms/yaml
 
 trigger: none
+pr: none
 
 pool: sonic-mirror-build-2
 variables:
