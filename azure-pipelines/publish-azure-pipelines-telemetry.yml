@@ -1,0 +1,27 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger: none
+
+pr: none
+
+schedules:
+- cron: "0 0 * * *"
+  displayName: Daily Build
+  branches:
+    include:
+    - telemetry
+  always: true
+
+pool: sonic-mirror-build
+
+stages:
+- stage: publish
+  jobs:
+  - job: publish
+    steps:
+    - script: |
+        echo "test"
+      displayName: publish
